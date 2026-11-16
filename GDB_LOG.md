@@ -6,9 +6,9 @@ One dated section per week. Paste the commands you used and the output you saw, 
 
 Partner name: [enter your name]
 
-> This editor-only workspace has no terminal or GDB, so the session below is
-> a reproducible procedure and expected result, not a claim that GDB was run.
-> Run the commands and replace the expected values with your actual transcript.
+> This editor-only workspace has no terminal or GDB. The calculations below
+> are derived from the source, not a claim that the commands were executed.
+> Run the commands locally and add the actual GDB transcript before submission.
 
 ### Predict before you run
 
@@ -17,7 +17,7 @@ processing a later card, so an over-21 total on the final card is never
 corrected. It also demotes at most one ace at each step. For hand 4 (A, 6, 5),
 it returns 22 instead of 12.
 
-### Build and run
+### Build and run (before the fix)
 
 ```
 cmake -S . -B build
@@ -25,12 +25,18 @@ cmake --build build --target hand_bug
 ./build/hand_bug
 ```
 
-Expected mismatches (hand number, printed total, correct total): 2 (22, 12),
-4 (22, 12), 5 (23, 13), 7 (26, 16), and 8 (31, 21).
+Expected mismatches from the original buggy implementation (hand number,
+printed total, correct total): 2 (22, 12), 4 (22, 12), 5 (23, 13), 7 (26,
+16), and 8 (31, 21).
+
+After the fix, the expected totals for hands 1-10 are 21, 12, 21, 12, 13, 21,
+16, 21, 25, and 21. These expected values still need to be confirmed by
+running `./build/hand_bug`.
 
 ### The GDB session on `Hand::value`
 
-Commands to run, in order (for the three-card failing hand 4):
+Commands to run against the original buggy version, in order (for the
+three-card failing hand 4):
 
 ```text
 cmake -S . -B build
@@ -49,21 +55,22 @@ gdb ./build/hand_bug
 The breakpoint condition restricts the stop to three-card hands. `display`
 reprints the two ace-calculation locals after each step; `next` advances one
 source line; `print *this` shows the current cards and count; `finish` runs to
-the end of `value()` and reports its return value.
+the end of `value()` and reports its return value. The original source has
+since been fixed, so run this session from the pre-fix version to reproduce the
+failure.
 
-- Expected values through hand 4's loop: after A, total 11 and aces-as-eleven
-  1; after 6, total 17 and aces-as-eleven 1; after 5, total 22 and
-  aces-as-eleven 1.
+- Expected pre-fix values: after A, total 11 and aces-as-eleven 1; after 6,
+  total 17 and aces-as-eleven 1; after 5, total 22 and aces-as-eleven 1.
 - Expected `print *this`: the three stored cards A, 6, 5 and `m_count == 3`.
-- Expected `finish`: 22; correct value from the rules: 12.
+- Expected pre-fix `finish`: 22; correct value from the rules: 12.
 
 ### Cause and fix
 
-- The line that is wrong: the `if (total > 21 ...)` check at the start of the
-  loop. It checks the prior total before adding the current card, so it cannot
-  demote an ace when the last card pushes the hand over 21.
-- The change you made: compute the hard total with every ace counted as 1,
-  then add 10 once if an ace can safely count as 11.
-- How you checked it: the focused tests assert A, A, 9 is 21 and A, 6, 5 is
-  12, along with hard totals, bust, and natural blackjack. The build/test run
-  and actual GDB transcript still need to be done in a terminal.
+- The line that was wrong: the `if (total > 21 ...)` check at the start of the
+  loop examined the total before adding the current card, so the last card
+  could push the hand over 21 without demoting an ace.
+- The fix: demote an ace after each card is added while the total is over 21
+  and an ace is still counted as 11.
+- How it was checked: the hand tests assert A, A, 9 is 21 and A, 6, 5 is 12,
+  along with hard totals, bust, and natural blackjack. The GDB session and
+  post-fix run still need to be performed in a terminal.

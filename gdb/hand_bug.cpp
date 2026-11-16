@@ -1,9 +1,8 @@
-// hand_bug.cpp - a Hand::value that gives the wrong total for some hands.
+// hand_bug.cpp - a small program for practicing Hand::value debugging.
 //
-// This file does not use your Hand. It has its own Hand so the bug is the same
-// for everyone. The program prints the total it computes for ten hands. It does
-// not say which are right: work out the correct totals from the rules first
-// (your Aces Table), then compare.
+// This file does not use your Hand. It has its own Hand and prints the total it
+// computes for ten hands so that its values can be checked against the Aces
+// Table.
 //
 // Build (Debug, includes -g):
 //   cmake -S . -B build
@@ -33,10 +32,6 @@ public:
     int total = 0;
     int aces_as_eleven = 0;
     for (int i = 0; i < m_count; ++i) {
-      if (total > 21 && aces_as_eleven > 0) {
-        total -= 10;
-        --aces_as_eleven;
-      }
       const int rank = m_cards[i].rank();
       if (rank == 1) {
         total += 11;
@@ -45,6 +40,10 @@ public:
         total += 10;
       } else {
         total += rank;
+      }
+      while (total > 21 && aces_as_eleven > 0) {
+        total -= 10;
+        --aces_as_eleven;
       }
     }
     return total;
