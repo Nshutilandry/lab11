@@ -161,7 +161,51 @@ TEST(HandBustTest, OverTwentyOneIsBust) {
   EXPECT_FALSE(hand_from("7 7 7").is_bust());
 }
 
-// TODO(student): add one TEST for each remaining row of your test table in
-// OPERATORS_NOTES.md. Work out the expected value from the rules, not from what
-// your code prints. The soft hands are the ones that catch mistakes: an ace
-// that counts 11 and later has to count 1, and hands with more than one ace.
+TEST(HandValueTest, TableAceKingIsBlackjack) {
+  const Hand hand{hand_from("A K")};
+  EXPECT_EQ(hand.value(), 21);
+  EXPECT_FALSE(hand.is_bust());
+  EXPECT_TRUE(hand.is_blackjack());
+}
+
+TEST(HandValueTest, TableTwoAcesUsesOneAsOne) {
+  const Hand hand{hand_from("A A")};
+  EXPECT_EQ(hand.value(), 12);
+  EXPECT_FALSE(hand.is_bust());
+  EXPECT_FALSE(hand.is_blackjack());
+}
+
+TEST(HandValueTest, TableTwoAcesAndNineIsTwentyOne) {
+  const Hand hand{hand_from("A A 9")};
+  EXPECT_EQ(hand.value(), 21);
+  EXPECT_FALSE(hand.is_bust());
+  EXPECT_FALSE(hand.is_blackjack());
+}
+
+TEST(HandValueTest, TableAceSixFiveIsTwelve) {
+  const Hand hand{hand_from("A 6 5")};
+  EXPECT_EQ(hand.value(), 12);
+  EXPECT_FALSE(hand.is_bust());
+  EXPECT_FALSE(hand.is_blackjack());
+}
+
+TEST(HandValueTest, TableTenTenFiveBusts) {
+  const Hand hand{hand_from("T T 5")};
+  EXPECT_EQ(hand.value(), 25);
+  EXPECT_TRUE(hand.is_bust());
+  EXPECT_FALSE(hand.is_blackjack());
+}
+
+TEST(HandValueTest, TableThreeSevensIsNotBlackjack) {
+  const Hand hand{hand_from("7 7 7")};
+  EXPECT_EQ(hand.value(), 21);
+  EXPECT_FALSE(hand.is_bust());
+  EXPECT_FALSE(hand.is_blackjack());
+}
+
+TEST(HandValueTest, TableSoftSixteenKeepsAceHigh) {
+  const Hand hand{hand_from("A 5")};
+  EXPECT_EQ(hand.value(), 16);
+  EXPECT_FALSE(hand.is_bust());
+  EXPECT_FALSE(hand.is_blackjack());
+}

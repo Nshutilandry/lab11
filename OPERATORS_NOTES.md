@@ -8,20 +8,54 @@ At least six hands. Work out each expected value from the rules **before** you r
 
 | Hand | Expected `value()` | `is_bust()` | `is_blackjack()` |
 | --- | --- | --- | --- |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+| A, K | 21 | false | true |
+| A, A | 12 | false | false |
+| A, A, 9 | 21 | false | false |
+| A, 6, 5 | 12 | false | false |
+| 10, 10, 5 | 25 | true | false |
+| 7, 7, 7 | 21 | false | false |
+| A, 5 | 16 | false | false |
 
 ## 2. Design artifacts
 
-List the files you added and where they are in the repository.
+The implementation and tests are in the existing files `src/card.cpp`,
+`src/hand.cpp`, `src/blackjack.cpp`, and `tests/test_hand.cpp`. The diagrams
+below are included here; no separate diagram files were added.
 
 - Updated class diagram (with `Hand` and its relationship to `Card`):
+
+  ```text
+  Card
+    rank: int
+    suit: Suit
+      ^
+      | contains by value (composition, up to 11)
+  Hand
+    m_cards: Card[max_hand]
+    m_count: int
+    +=(Card), [](int), value(), is_blackjack(), is_bust()
+  ```
+
 - Flowchart for `Hand::value`:
+
+  ```text
+  Start -> total = 0, ace_count = 0
+         -> for each card: add ace as 1 and count it;
+                           add face card as 10;
+                           otherwise add rank
+         -> if there is an ace and total + 10 <= 21, add 10
+         -> return total
+  ```
+
 - Flowchart for the dealer's turn:
+
+  ```text
+  Reveal dealer hand -> while total < 17 and hand has room:
+                         deal one card and add it
+                      -> compare with player's non-busted total
+                      -> dealer bust/player higher: player wins;
+                         equal: push; otherwise dealer wins
+  ```
 
 ## 3. Ownership classification
 
@@ -29,9 +63,9 @@ For each relationship, write **composition**, **aggregation**, or **association*
 
 | Relationship | Composition, aggregation, or association | One-sentence justification |
 | --- | --- | --- |
-| `Hand` and its `Card`s | | |
-| The Blackjack game and its `Deck` and `Hand`s | | |
-| `Player` and the current `Room*` in the Dungeon | | |
+| `Hand` and its `Card`s | Composition | A Hand stores its Card objects directly in its fixed array, so destroying the Hand destroys those Card subobjects and no other Hand can share them. |
+| The Blackjack game and its `Deck` and `Hand`s | Composition | The game creates the Deck and Hands as local round objects, so they are destroyed when their scope ends and no other game owns those objects. |
+| `Player` and the current `Room*` in the Dungeon | Association | The Room pointer is non-owning: destroying Player does not destroy the Room, which remains owned by the dungeon. |
 
 ## 4. Checklist before you push
 

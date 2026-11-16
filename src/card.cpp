@@ -47,12 +47,17 @@ std::string Card::to_string() const {
   return text;
 }
 
-// TODO(student): Lab 11. These three stubs compile but give wrong answers on
-// purpose, so the tests in tests/test_hand.cpp fail until you write them. Name
-// the parameters when you replace the bodies.
+bool Card::operator==(const Card &other) const {
+  return m_rank == other.m_rank && m_suit == other.m_suit;
+}
 
-bool Card::operator==(const Card &) const { return false; }
+bool Card::operator<(const Card &other) const {
+  if (m_rank != other.m_rank) {
+    return m_rank < other.m_rank;
+  }
+  return static_cast<int>(m_suit) < static_cast<int>(other.m_suit);
+}
 
-bool Card::operator<(const Card &) const { return false; }
-
-std::ostream &operator<<(std::ostream &out, const Card &) { return out; }
+std::ostream &operator<<(std::ostream &out, const Card &card) {
+  return out << card.to_string();
+}
