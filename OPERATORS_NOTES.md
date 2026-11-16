@@ -50,12 +50,18 @@ below are included here; no separate diagram files were added.
 - Flowchart for the dealer's turn:
 
   ```text
-  Reveal dealer hand -> while total < 17 and hand has room:
+  Reveal dealer hand -> while total < 17 and hand has room
+                         (soft 17 is already worth 17):
                          deal one card and add it
                       -> compare with player's non-busted total
                       -> dealer bust/player higher: player wins;
                          equal: push; otherwise dealer wins
   ```
+
+  The game starts with $100, wagers a fixed $10 each round, and reshuffles
+  before a round when fewer than 15 cards remain. A natural blackjack returns
+  the original wager plus 3:2 winnings ($25 total for a $10 bet). Because the
+  wager is fixed, play ends if the remaining bankroll is below $10.
 
 ## 3. Ownership classification
 
